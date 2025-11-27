@@ -1,0 +1,243 @@
+/* ---- Global ---- */
+body {
+  margin: 0;
+  padding: 0;
+  background: #252829;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  color: #fafffd;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding-top: 3rem;
+}
+
+/* ---- Container ---- */
+.container {
+  width: 95%;
+  max-width: 1200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  text-align: center;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Title ---- */
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Wallet Info ---- */
+.wallet-info {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.voter-status {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.voter-status.verified { color: #00e676; }
+.voter-status.not { color: #ffb300; }
+.voter-status.voted { color: #03a9f4; }
+
+/* ---- Buttons ---- */
+.btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.3rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  margin: 0.4rem;
+  font-weight: 500;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* Button Colors */
+.btn.connect { background-color: #0091ff; }
+.btn.fetch { background-color: #2d9bf0; }
+.btn.winner { background-color: #0f93e0; }
+.btn.vote { background-color: #015692; }
+.btn.register { background-color: #0f93e0; }
+
+/* ---- Candidate Section ---- */
+.candidate-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.candidate-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  width: 200px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.candidate-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.02);
+}
+
+.candidate-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
+  color: #fafffd;
+}
+
+.candidate-card p {
+  margin-bottom: 1rem;
+  color: #cfd8dc;
+  font-size: 0.9rem;
+}
+
+/* ---- Winner ---- */
+.winner-name {
+  margin-top: 1.5rem;
+  font-weight: 600;
+  color: #ffd54f;
+}
+
+/* ---- Admin Panel ---- */
+.admin-panel {
+  margin-top: 3rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+}
+
+.admin-panel h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ---- Admin Row ---- */
+.admin-row {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: stretch;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+/* ---- Admin and Register Boxes ---- */
+.admin-box,
+.register-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.5rem;
+  min-width: 300px;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+.admin-box:hover,
+.register-box:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+/* ---- Headers ---- */
+.admin-box h3,
+.register-box h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #fafffd;
+}
+
+/* ---- Inputs and Textareas ---- */
+.admin-box input,
+.register-box input,
+.register-box textarea {
+  width: 90%;
+  max-width: 380px;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fafffd;
+  outline: none;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-family: "Inter", sans-serif;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.admin-box input:focus,
+.register-box input:focus,
+.register-box textarea:focus {
+  border-color: #2d9bf0;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(45, 155, 240, 0.3);
+}
+
+.register-box textarea {
+  height: 80px;
+}
+
+/* ---- Register Buttons ---- */
+.btn.register {
+  width: 80%;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 10px;
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn.register:hover {
+  background-color: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.5);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .admin-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .admin-box,
+  .register-box {
+    width: 90%;
+  }
+}
