@@ -1,4 +1,7 @@
-/* ---- Global ---- */
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -12,7 +15,6 @@ body {
   padding-top: 3rem;
 }
 
-/* ---- Container ---- */
 .container {
   width: 95%;
   max-width: 1200px;
@@ -25,14 +27,13 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ---- Title ---- */
 .title {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
 }
 
-/* ---- Wallet Info ---- */
+
 .wallet-info {
   display: flex;
   justify-content: center;
@@ -228,7 +229,33 @@ body {
   box-shadow: 0 0 12px rgba(33, 150, 243, 0.5);
 }
 
-/* ---- Responsive ---- */
+/* Make Batch Register box match the other admin boxes */
+.admin-box textarea {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fafffd;
+  outline: none;
+  font-size: 0.95rem;
+  resize: none;
+  height: 48px; /* Same height as input field */
+  transition: all 0.2s ease;
+}
+
+.admin-box textarea::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+.admin-box textarea:focus {
+  border-color: #2d9bf0;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(45, 155, 240, 0.3);
+}
+
+
 @media (max-width: 900px) {
   .admin-row {
     flex-direction: column;
