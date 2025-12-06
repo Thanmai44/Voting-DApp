@@ -7,7 +7,7 @@ import "./App.css";
 // SSI Functions
 import { generateVC, verifyVC } from "./ssi";
 
-const contractAddress = "0xEc90Ac0f5907506d60Ed4586bD3e2b93F00Aa1cF";
+const contractAddress = "0xe9432c7Ac8e68022Dd971cD0cCB6b1Fcb73E098C";
 const contractABI = abiFile.abi;
 
 function App() {
