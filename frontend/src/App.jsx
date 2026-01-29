@@ -53,23 +53,32 @@ function App() {
   }
 
   async function connectWallet() {
-    if (!window.ethereum) return toast.error("Install MetaMask");
+    console.log("Checking window.ethereum:", window.ethereum);
+    if (!window.ethereum) {
+      console.error("MetaMask not found!");
+      return toast.error("MetaMask not detected. Try refreshing!");
+    }
 
     await checkNetwork();
 
-    const [account] = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
+    try {
+      const [account] = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
-    setWallet(account);
+      setWallet(account);
 
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-    const votingContract = new ethers.Contract(contractAddress, contractABI, signer);
-    setContract(votingContract);
+      const votingContract = new ethers.Contract(contractAddress, contractABI, signer);
+      setContract(votingContract);
 
-    toast.success("Wallet connected!");
+      toast.success("Wallet connected!");
+    } catch (err) {
+      console.error("Connection Error:", err);
+      toast.error("Connection failed: " + err.message);
+    }
   }
 
   // ---------------- Remove Logic ----------------
@@ -282,9 +291,9 @@ function App() {
       </div>
 
       {vc && (
-        <p style={{ color: "#00e676" }}>
+        <div className="vc-success-badge">
           ✅ SSI Credential Generated (stored locally)
-        </p>
+        </div>
       )}
 
       {/* Candidate List */}
