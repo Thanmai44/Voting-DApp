@@ -217,7 +217,7 @@ function App() {
 
     const valid = await verifyVC(vc, admin);
 
-    if (!valid) return toast.error("SSI Verification Failed! Only Admin can issue VCs.");
+    if (!valid) return toast.error("SSI Verification Failed! VC Invalid.");
 
     try {
       const tx = await contract.vote(candidateId);
@@ -226,8 +226,18 @@ function App() {
       toast.success("Vote submitted!");
       fetchCandidates();
       checkVoterStatus();
-    } catch {
-      toast.error("Voting failed. Already voted or not registered.");
+    } catch (err) {
+      console.error("Voting Error:", err);
+      // Try to extract the reason
+      let reason = err.reason || err.shortMessage || err.message || "Unknown error";
+      if (reason.includes("execution reverted")) {
+        reason = reason.replace("execution reverted: ", "");
+      }
+      // Fallback for common errors if reason is messy
+      if (reason.includes("Not registered")) reason = "Address not registered by Admin.";
+      else if (reason.includes("Already voted")) reason = "You have already voted.";
+
+      toast.error("Voting Failed: " + reason);
     }
   }
 

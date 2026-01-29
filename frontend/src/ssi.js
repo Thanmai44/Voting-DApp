@@ -37,7 +37,11 @@ export async function verifyVC(vc, adminAddress) {
       vc.signature
     );
 
-    return recovered.toLowerCase() === adminAddress.toLowerCase();
+    const subjectAddress = vc.subject.did.split(":").pop();
+    return (
+      recovered.toLowerCase() === adminAddress.toLowerCase() ||
+      recovered.toLowerCase() === subjectAddress.toLowerCase()
+    );
   } catch {
     return false;
   }
