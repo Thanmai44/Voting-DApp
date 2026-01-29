@@ -3,8 +3,6 @@ pragma solidity ^0.8.20;
 
 contract Voting {
     address public admin;
-    bool public electionActive;
-
     struct Candidate {
         uint id;
         string name;
@@ -31,18 +29,6 @@ contract Voting {
         _;
     }
 
-    modifier electionOngoing() {
-        require(electionActive, "Election not active");
-        _;
-    }
-
-    function startElection() public onlyAdmin {
-        electionActive = true;
-    }
-
-    function endElection() public onlyAdmin {
-        electionActive = false;
-    }
 
     function addCandidate(string memory _name) public onlyAdmin {
         require(!candidateExists[_name], "Candidate already exists");
@@ -64,7 +50,7 @@ contract Voting {
         voters[_voter].registered = true;
     }
 
-    function vote(uint _candidateId) public electionOngoing {
+    function vote(uint _candidateId) public {
         require(voters[msg.sender].registered, "Not registered");
         require(!voters[msg.sender].voted, "Already voted");
         require(_candidateId > 0 && _candidateId <= candidatesCount, "Invalid candidate");

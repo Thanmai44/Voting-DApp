@@ -6,7 +6,7 @@ import "./App.css";
 
 import { generateVC, verifyVC } from "./ssi";
 
-const contractAddress = "0x71909Ec39C7CE019d78bAe59Ec707C9b8A24A9A7";
+const contractAddress = "0xcf9B301500aff227096E2FF6F52661A46250d64a";
 const contractABI = abiFile.abi;
 
 function App() {
@@ -193,16 +193,7 @@ function App() {
     }
   }
 
-  async function startElection() {
-    if (!contract) return;
-    try {
-      const tx = await contract.startElection();
-      await tx.wait();
-      toast.success("Election Started!");
-    } catch {
-      toast.error("Failed to start election");
-    }
-  }
+
 
   // ---------------- SSI: Issue Verifiable Credential ----------------
   async function issueVC() {
@@ -256,28 +247,22 @@ function App() {
       <h1 className="title">Blockchain Voting with SSI (DID + VC)</h1>
 
       {!wallet ? (
-        <button className="btn connect" onClick={connectWallet}>
-          Connect Wallet
+        <button className="btn connect main-connect-btn" onClick={connectWallet}>
+          <span>🔌</span> Connect Wallet
         </button>
       ) : (
-        <p
-          onClick={() => { navigator.clipboard.writeText(wallet); toast.success("Address Copied!"); }}
-          style={{ cursor: "pointer", textDecoration: "underline" }}
-          title="Click to copy full address"
-        >
-          Connected: {wallet.slice(0, 6)}...{wallet.slice(-4)} (Click to Copy)
-          <span style={{
-            marginLeft: "10px",
-            padding: "4px 8px",
-            borderRadius: "12px",
-            fontSize: "0.8em",
-            backgroundColor: wallet.toLowerCase() === admin ? "#ffd700" : "#e0e0e0",
-            color: "#333",
-            fontWeight: "bold"
-          }}>
+        <div className="wallet-info">
+          <div
+            className="wallet-address"
+            onClick={() => { navigator.clipboard.writeText(wallet); toast.success("Address Copied!"); }}
+            title="Click to copy full address"
+          >
+            <span>🟢</span> {wallet.slice(0, 6)}...{wallet.slice(-4)}
+          </div>
+          <span className={`role-badge ${wallet.toLowerCase() === admin ? "role-admin" : "role-voter"}`}>
             {wallet.toLowerCase() === admin ? "👑 Admin" : "👤 Voter"}
           </span>
-        </p>
+        </div>
       )}
 
       <div className="control-buttons">
@@ -317,7 +302,7 @@ function App() {
       {winner && <h3 className="winner-name">Winner: {winner}</h3>}
 
       {/* Admin Panel */}
-      {wallet.toLowerCase() === admin && (
+      {wallet && admin && wallet.toLowerCase() === admin && (
         <div className="admin-panel">
           <h2>Admin Panel</h2>
 
@@ -340,10 +325,7 @@ function App() {
               <button className="btn register" onClick={registerBatchVoters}>Submit Batch</button>
             </div>
 
-            <div className="admin-box">
-              <h3>Election Control</h3>
-              <button className="btn issues" onClick={startElection} style={{ backgroundColor: "#4CAF50" }}>Start Election</button>
-            </div>
+
           </div>
         </div>
       )}
