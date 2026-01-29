@@ -4,10 +4,9 @@ import toast, { Toaster } from "react-hot-toast";
 import abiFile from "./Voting.json";
 import "./App.css";
 
-// SSI Functions
 import { generateVC, verifyVC } from "./ssi";
 
-const contractAddress = "0xe9432c7Ac8e68022Dd971cD0cCB6b1Fcb73E098C";
+const contractAddress = "0x71909Ec39C7CE019d78bAe59Ec707C9b8A24A9A7";
 const contractABI = abiFile.abi;
 
 function App() {
@@ -22,11 +21,41 @@ function App() {
   const [newCandidate, setNewCandidate] = useState("");
   const [status, setStatus] = useState("");
 
-  const [vc, setVC] = useState(null); // store verifiable credential
+  const [vc, setVC] = useState(null);
 
-  // ---------------- Wallet ----------------
+  async function checkNetwork() {
+    if (!window.ethereum) return;
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    if (chainId !== "0xaa36a7") { // Sepolia Chain ID
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xaa36a7" }],
+        });
+      } catch (error) {
+        toast.error("Please switch MetaMask to Sepolia!");
+      }
+    }
+  }
+
+  async function debugConnection() {
+    if (!contract) return toast.error("Connect Wallet First");
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    const code = await provider.getCode(contractAddress);
+
+    console.log("Debug Info:");
+    console.log("Connected Chain ID:", network.chainId.toString());
+    console.log("Contract Address:", contractAddress);
+    console.log("Contract Code Size:", code.length);
+
+    alert(`Chain ID: ${network.chainId}\nCode Size: ${code.length}\n(Size 2 means empty/wrong network)`);
+  }
+
   async function connectWallet() {
     if (!window.ethereum) return toast.error("Install MetaMask");
+
+    await checkNetwork();
 
     const [account] = await window.ethereum.request({
       method: "eth_requestAccounts",
@@ -42,6 +71,28 @@ function App() {
 
     toast.success("Wallet connected!");
   }
+
+  // ---------------- Remove Logic ----------------
+  async function removeCandidate(id) {
+    console.log("Attempting to remove candidate ID:", id);
+    if (!contract) {
+      console.error("Contract not loaded");
+      return;
+    }
+    try {
+      const tx = await contract.removeCandidate(id);
+      console.log("Transaction sent:", tx);
+      await tx.wait();
+      console.log("Transaction confirmed");
+      toast.success("Candidate removed");
+      fetchCandidates();
+    } catch (err) {
+      console.error("Remove Candidate Error:", err);
+      toast.error("Failed: " + (err.reason || err.message));
+    }
+  }
+
+
 
   // ---------------- Fetch Admin ----------------
   useEffect(() => {
@@ -96,13 +147,16 @@ function App() {
       const list = [];
 
       for (let i = 1; i <= count; i++) {
-        const [name, votes] = await contract.getCandidate(i);
-        list.push({ id: i, name, votes: Number(votes) });
+        const [name, votes, active] = await contract.getCandidate(i);
+        if (active) {
+          list.push({ id: i, name, votes: Number(votes) });
+        }
       }
 
       setCandidates(list);
-    } catch {
-      toast.error("Error fetching candidates");
+    } catch (error) {
+      console.error("Fetch Candidates Error:", error);
+      toast.error("Error fetching: " + (error.reason || error.message));
     }
   }
 
@@ -139,23 +193,40 @@ function App() {
     }
   }
 
+  async function startElection() {
+    if (!contract) return;
+    try {
+      const tx = await contract.startElection();
+      await tx.wait();
+      toast.success("Election Started!");
+    } catch {
+      toast.error("Failed to start election");
+    }
+  }
+
   // ---------------- SSI: Issue Verifiable Credential ----------------
   async function issueVC() {
     if (!wallet) return toast.error("Connect wallet first!");
+    if (!contract) return toast.error("Contract not loaded");
 
-    const credential = generateVC(wallet);
-    setVC(credential);
-
-    toast.success("SSI Credential Issued!");
+    try {
+      const signer = contract.runner;
+      const credential = await generateVC(wallet, signer);
+      setVC(credential);
+      toast.success("SSI Credential Issued!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error issuing VC");
+    }
   }
 
   // ---------------- SSI Verification Before Voting ----------------
   async function vote(candidateId) {
     if (!vc) return toast.error("You must generate SSI credential first!");
 
-    const valid = verifyVC(vc);
+    const valid = await verifyVC(vc, admin);
 
-    if (!valid) return toast.error("SSI Verification Failed!");
+    if (!valid) return toast.error("SSI Verification Failed! Only Admin can issue VCs.");
 
     try {
       const tx = await contract.vote(candidateId);
@@ -177,6 +248,8 @@ function App() {
     toast.success("Winner Loaded");
   }
 
+  const [voterToRemove, setVoterToRemove] = useState("");
+
   // ---------------- Render ----------------
   return (
     <div className="container">
@@ -187,7 +260,24 @@ function App() {
           Connect Wallet
         </button>
       ) : (
-        <p>Connected: {wallet.slice(0, 6)}...{wallet.slice(-4)}</p>
+        <p
+          onClick={() => { navigator.clipboard.writeText(wallet); toast.success("Address Copied!"); }}
+          style={{ cursor: "pointer", textDecoration: "underline" }}
+          title="Click to copy full address"
+        >
+          Connected: {wallet.slice(0, 6)}...{wallet.slice(-4)} (Click to Copy)
+          <span style={{
+            marginLeft: "10px",
+            padding: "4px 8px",
+            borderRadius: "12px",
+            fontSize: "0.8em",
+            backgroundColor: wallet.toLowerCase() === admin ? "#ffd700" : "#e0e0e0",
+            color: "#333",
+            fontWeight: "bold"
+          }}>
+            {wallet.toLowerCase() === admin ? "👑 Admin" : "👤 Voter"}
+          </span>
+        </p>
       )}
 
       <div className="control-buttons">
@@ -211,6 +301,15 @@ function App() {
             <button className="btn vote" onClick={() => vote(c.id)}>
               Vote
             </button>
+            {wallet.toLowerCase() === admin && (
+              <button
+                className="btn delete"
+                style={{ backgroundColor: "#ff4444", marginTop: "10px" }}
+                onClick={() => removeCandidate(c.id)}
+              >
+                Remove
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -239,6 +338,11 @@ function App() {
               <h3>Batch Register</h3>
               <textarea value={batchVoters} onChange={(e) => setBatchVoters(e.target.value)} placeholder="addr1, addr2, ..." />
               <button className="btn register" onClick={registerBatchVoters}>Submit Batch</button>
+            </div>
+
+            <div className="admin-box">
+              <h3>Election Control</h3>
+              <button className="btn issues" onClick={startElection} style={{ backgroundColor: "#4CAF50" }}>Start Election</button>
             </div>
           </div>
         </div>
