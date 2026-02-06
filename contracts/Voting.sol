@@ -30,7 +30,29 @@ contract Voting {
     }
 
 
+    uint256 public electionEndTime;
+    bool public electionStarted;
+
+    modifier onlyDuringElection() {
+        require(electionStarted, "Election has not started yet");
+        require(block.timestamp <= electionEndTime, "Election has ended");
+        _;
+    }
+
+    modifier onlyAfterElection() {
+        require(electionStarted, "Election has not started yet");
+        require(block.timestamp > electionEndTime, "Election is still ongoing");
+        _;
+    }
+
+    function startElection() public onlyAdmin {
+        require(!electionStarted, "Election already started");
+        electionStarted = true;
+        electionEndTime = block.timestamp + 12 hours; // Election runs for 12 hours
+    }
+
     function addCandidate(string memory _name) public onlyAdmin {
+        require(!electionStarted, "Cannot add candidate after election started");
         require(!candidateExists[_name], "Candidate already exists");
         candidatesCount++;
         candidates[candidatesCount] = Candidate(candidatesCount, _name, 0, true);
@@ -38,6 +60,7 @@ contract Voting {
     }
 
     function removeCandidate(uint _id) public onlyAdmin {
+        require(!electionStarted, "Cannot remove candidate after election started");
         require(_id > 0 && _id <= candidatesCount, "Invalid candidate");
         require(candidates[_id].active, "Candidate already removed");
         
@@ -50,7 +73,7 @@ contract Voting {
         voters[_voter].registered = true;
     }
 
-    function vote(uint _candidateId) public {
+    function vote(uint _candidateId) public onlyDuringElection {
         require(voters[msg.sender].registered, "Not registered");
         require(!voters[msg.sender].voted, "Already voted");
         require(_candidateId > 0 && _candidateId <= candidatesCount, "Invalid candidate");
@@ -65,7 +88,7 @@ contract Voting {
         return (c.name, c.voteCount, c.active);
     }
 
-    function getWinner() public view returns (string memory) {
+    function getWinner() public view onlyAfterElection returns (string memory) {
         uint maxVotes = 0;
         uint winnerId = 0;
         for (uint i = 1; i <= candidatesCount; i++) {
