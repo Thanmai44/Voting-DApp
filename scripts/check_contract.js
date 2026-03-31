@@ -1,7 +1,6 @@
 const hre = require("hardhat");
 
 async function main() {
-    // This address was from our previous deployment log
     const address = "0x71909Ec39C7CE019d78bAe59Ec707C9b8A24A9A7";
     const Voting = await hre.ethers.getContractFactory("Voting");
     const contract = Voting.attach(address);

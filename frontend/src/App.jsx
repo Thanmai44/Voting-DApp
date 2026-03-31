@@ -6,7 +6,7 @@ import "./App.css";
 
 import { generateVC, verifyVC } from "./ssi";
 
-const contractAddress = "0x43e315Ad75b0b0219cd007749eF05013c46e3798";
+const contractAddress = "0x04Ade50b079Bd8567aB8bE0B72387c1A75E5F4D2";
 const contractABI = abiFile.abi;
 
 function App() {
@@ -15,6 +15,8 @@ function App() {
   const [contract, setContract] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [winner, setWinner] = useState("");
+  const [hasFetched, setHasFetched] = useState(false);
+
 
   const [newVoter, setNewVoter] = useState("");
   const [batchVoters, setBatchVoters] = useState("");
@@ -122,7 +124,6 @@ function App() {
 
   async function removeCandidate(id) {
     if (!contract) return;
-    if (electionStarted) return toast.error("Cannot remove after election started");
     try {
       const tx = await contract.removeCandidate(id);
       await tx.wait();
@@ -159,14 +160,18 @@ function App() {
 
   async function addCandidate() {
     if (!newCandidate.trim()) return toast.error("Enter name");
-    if (electionStarted) return toast.error("Cannot add after election started");
+    if (!contract) return toast.error("Contract not initialized");
+    if (wallet.toLowerCase() !== admin.toLowerCase()) return toast.error("Only admin can add candidates");
     try {
       const tx = await contract.addCandidate(newCandidate);
       await tx.wait();
       toast.success("Candidate added!");
       setNewCandidate("");
       fetchCandidates();
-    } catch { toast.error("Error adding candidate"); }
+    } catch (err) { 
+      console.error("Add candidate error:", err);
+      toast.error(err.reason || "Error adding candidate");
+    }
   }
 
   async function fetchCandidates() {
@@ -179,7 +184,9 @@ function App() {
         if (active) list.push({ id: i, name, votes: Number(votes) });
       }
       setCandidates(list);
+      setHasFetched(true);
     } catch (error) { console.error(error); }
+
   }
 
   async function registerVoter() {
@@ -270,11 +277,11 @@ function App() {
       )}
 
       {
-      electionStarted && (
-        <div className="timer-container" style={{ margin: "2rem 0", fontSize: "1.5rem", fontWeight: "bold", color: isElectionActive ? "var(--primary)" : "var(--accent)" }}>
-          {isElectionActive ? `⏳ Time Left: ${timeLeft}` : "🏁 Election Ended"}
-        </div>
-      )}
+        electionStarted && (
+          <div className="timer-container" style={{ margin: "2rem 0", fontSize: "1.5rem", fontWeight: "bold", color: isElectionActive ? "var(--primary)" : "var(--accent)" }}>
+            {isElectionActive ? `⏳ Time Left: ${timeLeft}` : "🏁 Election Ended"}
+          </div>
+        )}
 
       <div className="control-buttons">
         {wallet && admin && wallet.toLowerCase() === admin && !electionStarted && (
@@ -302,12 +309,18 @@ function App() {
               <button className="btn vote" onClick={() => vote(c.id)}>Vote</button>
             )}
 
-            {wallet.toLowerCase() === admin && !electionStarted && (
+            {wallet.toLowerCase() === admin && (
               <button className="btn delete" onClick={() => removeCandidate(c.id)}>Remove</button>
             )}
           </div>
         ))}
       </div>
+
+      {hasFetched && candidates.length === 0 && (
+        <div style={{ textAlign: "center", marginTop: "20px", color: "var(--text-secondary)", fontSize: "1.2rem" }}>
+          <p>No candidates found. {wallet.toLowerCase() === admin ? "Add one below! 👇" : "Ask admin to add candidates."}</p>
+        </div>
+      )}
 
       {winner && <h3 className="winner-name">Winner: {winner}</h3>}
 
@@ -318,7 +331,7 @@ function App() {
             <div className="admin-box">
               <h3>Add Candidate</h3>
               <input value={newCandidate} onChange={(e) => setNewCandidate(e.target.value)} placeholder="Name" />
-              <button className="btn register" onClick={addCandidate} disabled={electionStarted}>Add</button>
+              <button className="btn register" onClick={addCandidate}>Add</button>
             </div>
             <div className="admin-box">
               <h3>Register Voter</h3>

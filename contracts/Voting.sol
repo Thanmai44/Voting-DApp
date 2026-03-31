@@ -52,7 +52,6 @@ contract Voting {
     }
 
     function addCandidate(string memory _name) public onlyAdmin {
-        require(!electionStarted, "Cannot add candidate after election started");
         require(!candidateExists[_name], "Candidate already exists");
         candidatesCount++;
         candidates[candidatesCount] = Candidate(candidatesCount, _name, 0, true);
@@ -60,7 +59,6 @@ contract Voting {
     }
 
     function removeCandidate(uint _id) public onlyAdmin {
-        require(!electionStarted, "Cannot remove candidate after election started");
         require(_id > 0 && _id <= candidatesCount, "Invalid candidate");
         require(candidates[_id].active, "Candidate already removed");
         
