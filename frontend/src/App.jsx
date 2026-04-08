@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { ethers } from "ethers";
 import toast, { Toaster } from "react-hot-toast";
 import abiFile from "./Voting.json";
@@ -185,7 +186,7 @@ function App() {
       }
       setCandidates(list);
       setHasFetched(true);
-    } catch (error) { console.error(error); }
+    } catch (error) { console.error(error); } 
 
   }
 
@@ -278,7 +279,7 @@ function App() {
 
       {
         electionStarted && (
-          <div className="timer-container" style={{ margin: "2rem 0", fontSize: "1.5rem", fontWeight: "bold", color: isElectionActive ? "var(--primary)" : "var(--accent)" }}>
+          <div className="timer-container">
             {isElectionActive ? `⏳ Time Left: ${timeLeft}` : "🏁 Election Ended"}
           </div>
         )}
@@ -301,7 +302,22 @@ function App() {
 
       <div className="candidate-list">
         {candidates.map((c) => (
-          <div key={c.id} className="candidate-card">
+          <motion.div 
+            key={c.id} 
+            className="candidate-card"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ 
+              y: -10, 
+              transition: { duration: 0.2 },
+              boxShadow: "0 20px 40px rgba(0,0,0,0.4)" 
+            }}
+          >
+            <img 
+              src={`https://api.dicebear.com/7.x/identicon/svg?seed=${c.name}`} 
+              alt="avatar" 
+              className="avatar" 
+            />
             <h3>{c.name}</h3>
             {wallet.toLowerCase() === admin && <p>Votes: {c.votes}</p>}
 
@@ -312,13 +328,13 @@ function App() {
             {wallet.toLowerCase() === admin && (
               <button className="btn delete" onClick={() => removeCandidate(c.id)}>Remove</button>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
 
       {hasFetched && candidates.length === 0 && (
         <div style={{ textAlign: "center", marginTop: "20px", color: "var(--text-secondary)", fontSize: "1.2rem" }}>
-          <p>No candidates found. {wallet.toLowerCase() === admin ? "Add one below! 👇" : "Ask admin to add candidates."}</p>
+          <p>No candidates found. {wallet.toLowerCase() === admin ? "Add one below!" : "Ask admin to add candidates."}</p>
         </div>
       )}
 
